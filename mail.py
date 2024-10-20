@@ -7,8 +7,9 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from dotenv import load_dotenv
 import re
+recipientList=['avpersonal7888@gmail.com']
 
-def sendEmail(image_data_url, recipient='avpersonal7888@gmail.com', subject='⚠️ DANGER ALERT: Elephant and Human Detected!'):
+def sendEmail(image_data_url, recipient=recipientList, subject='⚠️ DANGER ALERT: Elephant and Human Detected!'):
     try:
         # Load environment variables
         load_dotenv()
