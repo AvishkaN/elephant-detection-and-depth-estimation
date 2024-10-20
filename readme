@@ -1,0 +1,3 @@
+download https://drive.google.com/file/d/1prm08LRmEY4bPHCNxRIugTf8xUW5S9hU/view?usp=sharing
+conda create --name env-elephant-3-9 python=3.9.19
+pip install ultralytics==8.1.29
