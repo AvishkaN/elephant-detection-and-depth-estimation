@@ -7,88 +7,47 @@ import os
 import requests
 
 
-def getDataRecords():
+# def getDataRecords():
 
-    # URL of the API endpoint
-    url = "http://iotprojects.mypressonline.com/php/get_data.php"  
+#     # URL of the API endpoint
+#     url = "http://iotprojects.mypressonline.com/php/get_data.php"  
 
-    try:
-        # Send the GET request
-        response = requests.get(url)
+#     try:
+#         # Send the GET request
+#         response = requests.get(url)
 
         
         
-        # Check if the request was successful (status code 200)
-        if response.status_code == 200:
-            # Parse the JSON response data
-            data = response.json()
+#         # Check if the request was successful (status code 200)
+#         if response.status_code == 200 and False:
+#             # Parse the JSON response data
+#             data = response.json()
             
-            # Display the DataFrame with capitalized headers
-            print("Data retrieved successfully and loaded")
-            getDatInsights(data)
+#             # Display the DataFrame with capitalized headers
+#             print("Data retrieved successfully and loaded")
+#             getDatInsights(data)
 
-        else:
-            print(f"Error: Unable to fetch data. Status code: {response.status_code}")
-            failAPICall()
-    except requests.exceptions.RequestException as e:
-        # Print any request errors
-        print(f"Request failed: {e}")
-        failAPICall()
-
-
-
-def generate_synthetic_data(num_entries=500):
-    data = []
-    start_time = datetime(2024, 9, 4, 16, 30)
-
-    for i in range(num_entries):
-        timestamp = start_time + timedelta(seconds=np.random.randint(30, 600))
-        status = np.random.choice([True, False], p=[0.3, 0.7])
-        
-        if status:
-            temperature = round(np.random.uniform(25, 35), 2)
-            humidity = round(np.random.uniform(60, 100), 2)
-            lux_level = round(np.random.uniform(30, 100), 2)
-        else:
-            temperature = round(np.random.uniform(20, 25), 2)
-            humidity = round(np.random.uniform(50, 60), 2)
-            lux_level = round(np.random.uniform(0, 30), 2)
-
-        data.append({
-            "ID": i + 1,
-            "Timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-            "Status": status,
-            "Temperature": temperature,
-            "Humidity": humidity,
-            "Lux Level": lux_level
-        })
-
-        start_time = timestamp
-    return data
+#         else:
+#             print(f"Error: Unable to fetch data. Status code: {response.status_code}")
+#             failAPICall()
+#     except requests.exceptions.RequestException as e:
+#         # Print any request errors
+#         print(f"Request failed: {e}")
+#         failAPICall()
 
 
 
-def failAPICall():
-    getDatInsights(generate_synthetic_data())
 
 
-def getDatInsights(data):
+# def failAPICall():
+#     getDatInsights()
+
+
+def getDatInsights():
     # Create a timestamped folder with hyphens instead of colons
     folder_name = datetime.now().strftime("%H-%M-%S %d-%m-%Y")
     os.makedirs(folder_name, exist_ok=True)
 
-    # Save the full synthetic data to a CSV file inside the folder
-    # df = generate_synthetic_data(1000)
-    dfTest = pd.DataFrame(generate_synthetic_data(1000))
-    dfTest.to_csv('genaratedData.csv',index=False)
-
-    if os.path.exists('temp_data.csv'):
-        os.remove('temp_data.csv')
-
-    dfLoad = pd.DataFrame(data)
-    # Save the DataFrame to a CSV file
-    dfLoad.to_csv('temp_data.csv', index=False)
-    # df=pd.read_csv('temp_data.csv')
     df=pd.read_csv('all_data.csv')
 
     df.to_csv(os.path.join(folder_name, '2_all_data.csv'), index=False)
@@ -164,27 +123,53 @@ def getDatInsights(data):
     plt.savefig(os.path.join(folder_name, '7_correlation_matrix.png'))
     plt.close()
 
+    DatObj={}
+
     # Create CSV output
     csv_output = []
 
-    csv_output.append(["1.All Detection Data (please refer 2_all_data.csv file)"])
-    csv_output.append([""])
+    # csv_output.append(["1.All Detection Data (please refer 2_all_data.csv file)"])
+    # csv_output.append([""])
 
-    csv_output.append(["1.Total Detection Count"])
-    csv_output.append([total_detection_count])
-    csv_output.append([""])
+    # csv_output.append(["1.Total Detection Count"])
+    # csv_output.append([total_detection_count])
+    # csv_output.append([""])
 
-    csv_output.append(["2. Detection Frequency"])
-    csv_output.append(detection_counts.reset_index().values.tolist())
-    csv_output.append([""])
+    DatObj['total_detection_count']=total_detection_count
+
+    # csv_output.append(["2. Detection Frequency"])
+    # csv_output.append(detection_counts.reset_index().values.tolist())
+    # csv_output.append([""])
+
+    DatObj['detection_frequency']=detection_counts.reset_index().values.tolist()
 
     csv_output.append(["3. Hourly Detection Rate (please refer 3_hourly_detection_rate.png chart image)"])
     csv_output.append([""])
+    print('--------')
+    # print(hourly_detection_rate['Timestamp'].to_numpy())
+    # print(hourly_detection_rate['Timestamp'].to_numpy())
+    # print(hourly_detection_rate.values)
+    # print(hourly_detection_rate.to_numpy() )
+
+    # columns_as_arrays = {col: hourly_detection_rate[col].to_numpy() for col in hourly_detection_rate.columns}
+
+    # print(columns_as_arrays)
+    print(hourly_detection_rate)
+    print(hourly_detection_rate[1])
+    # first_column = hourly_detection_rate.iloc[:, 0].to_numpy()  # 0 is the index of the first column
+    # print(first_column)
+
+    DatObj['hourly_detection_rate']=hourly_detection_rate.to_numpy() 
+    print('--------')
 
     csv_output.append(["4. Environmental Conditions During Detections (for more please refer 4_environmental_conditions.png)"])
     csv_output.append([["Condition Type", "Temperature", "Humidity", "Lux Level"]])
     csv_output.append(conditions.T.reset_index().values.tolist())
     csv_output.append([""])
+
+
+    DatObj['env_Conditions_During_Detection']=detection_counts.reset_index().values.tolist()
+
 
     plt.figure(figsize=(12, 6))
     conditions.plot(kind='bar', title='Environmental Conditions During Detections')
@@ -197,6 +182,8 @@ def getDatInsights(data):
     df['Time Difference (Minutes)'] = (df['Time Difference'].dt.total_seconds() / 60.0).round(2)
     df[['Timestamp', 'Time Difference (Minutes)']].to_csv(os.path.join(folder_name, '5_detection_events.csv'), index=False)
 
+
+
     csv_output.append(["5. Duration of Detection Events (for more please refer 5_detection_events.csv file)"])
     csv_output.append(["Timestamp , Time Difference (Minutes)"])
     for _, row in df[['Timestamp', 'Time Difference (Minutes)']].head(20).iterrows():
@@ -207,10 +194,23 @@ def getDatInsights(data):
     csv_output.append(daily_trend.reset_index().values.tolist())
     csv_output.append([""])
 
+    # DatObj['daily_detection_trend']=daily_trend.reset_index().values.tolist()
+
+
     csv_output.append(["8. Correlation Matrix (please refer 7_correlation_matrix.png chart image)"])
     csv_output.append(correlation_matrix.reset_index().values.tolist())
     csv_output.append([""])
 
+    # DatObj['corr_matrix']=correlation_matrix.reset_index().values.tolist()
+
+
     final_output_df = pd.DataFrame([item for sublist in csv_output for item in sublist])
     final_output_df.to_csv(os.path.join(folder_name, '1_combined_analysis_with_chart.csv'), index=False, header=False)
 
+    print(DatObj)
+
+    return DatObj
+
+
+
+# getDatInsights()
