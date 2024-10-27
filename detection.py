@@ -6,8 +6,14 @@ import paho.mqtt.client as mqtt
 import torch
 import base64
 from datetime import datetime
+import threading
 
 from mail import sendEmail
+
+
+# Function to send email in a separate thread
+def send_email_thread(data_url):
+    sendEmail(data_url)
 
 def runElephantDetection():
     # MQTT connection functions (unchanged)
@@ -49,7 +55,7 @@ def runElephantDetection():
     elephantExitCount = 0
 
     recodedDangerEvents = 0
-    dangerRecordedThreshold = 3
+    dangerRecordedThreshold = 25
 
     # Reference bounding box width and distance for distance estimation
     REFERENCE_BBOX_WIDTH = 300
@@ -70,7 +76,7 @@ def runElephantDetection():
 
         if torch.cuda.is_available():
             device = torch.device('cuda')
-            print("GPU detected")
+            print("GPU is available. Using:", torch.cuda.get_device_name(0))
         else:
             device = torch.device('cpu')
             print("GPU not detected, using CPU")
@@ -167,8 +173,8 @@ def runElephantDetection():
 
                             # Create the data URL format for embedding in HTML
                             data_url = f"data:image/jpeg;base64,{img_base64}"
-                            sendEmail(data_url)
-
+                            # Start a new thread for sending email
+                            threading.Thread(target=send_email_thread, args=(data_url,)).start()
                         else:
                             recodedDangerEvents += 1
                       
