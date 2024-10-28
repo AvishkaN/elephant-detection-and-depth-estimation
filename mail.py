@@ -7,9 +7,12 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from dotenv import load_dotenv
 import re
-recipientList=['avpersonal7888@gmail.com']
 
-def sendEmail(image_data_url, recipient=recipientList[0], subject='⚠️ DANGER ALERT: Elephant and Human Detected!'):
+
+import requests
+
+
+def sendEmailRequest(image_data_url, recipient,person, subject,distance):
     try:
         # Load environment variables
         load_dotenv()
@@ -62,5 +65,58 @@ def sendEmail(image_data_url, recipient=recipientList[0], subject='⚠️ DANGER
 
         print("Email sent successfully!")
 
+        successMsgToBe(person,distance)
+
+
+
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+
+def successMsgToBe(obj,distance):
+    # URL of the API endpoint
+    url = "http://localhost:5100/api/sended-notifications"
+
+    # Payload with data to send
+    payload = {
+        "name": obj['name'],
+        "email": obj['email'],
+        "company": obj['company'],
+        "distance": distance
+    }
+
+    # Sending a POST request to the server with the payload as JSON
+    response = requests.post(url, json=payload)
+
+    # Handling the response
+    if response.status_code == 200:
+        print("Success:", response.json())
+    else:
+        print("Error:", response.status_code, response.text)
+
+
+
+
+def sendEmail(image_data_url, subject,distance):
+
+    url = "http://localhost:5100/api/notify-users?limit=10&page=1&column=0&order=desc"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
+        responseConverted=response.json()
+        if(responseConverted['status']):
+            for person in responseConverted['data']['records']:
+                print(person['email'])
+                sendEmailRequest(image_data_url,person['email'],person,subject,distance)
+
+
+
+
+    except requests.exceptions.ConnectionError:
+        print("Failed to connect to the server. Make sure it’s running on the specified port.")
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
+
+

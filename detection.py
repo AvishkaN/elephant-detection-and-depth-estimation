@@ -12,8 +12,8 @@ from mail import sendEmail
 
 
 # Function to send email in a separate thread
-def send_email_thread(data_url):
-    sendEmail(data_url)
+def send_email_thread(data_url,subject,distance):
+    sendEmail(data_url,subject,distance)
 
 def runElephantDetection():
     # MQTT connection functions (unchanged)
@@ -152,6 +152,8 @@ def runElephantDetection():
                         # Change label text color to red
                         label_color = (0, 0, 255)
 
+                        calDis=calculate_distance(ex2-ex1, REFERENCE_BBOX_WIDTH, REFERENCE_DISTANCE)
+
                         # Update the text to red for danger labels
                         cv2.putText(frame, f"{allowed_class_idsDic[20]} {calculate_distance(ex2-ex1, REFERENCE_BBOX_WIDTH, REFERENCE_DISTANCE):.2f}m", 
                                     (int(ex1), int(ey1 - 10)), cv2.FONT_HERSHEY_SIMPLEX, 1.3, label_color, 3)
@@ -174,7 +176,7 @@ def runElephantDetection():
                             # Create the data URL format for embedding in HTML
                             data_url = f"data:image/jpeg;base64,{img_base64}"
                             # Start a new thread for sending email
-                            threading.Thread(target=send_email_thread, args=(data_url,)).start()
+                            threading.Thread(target=send_email_thread, args=(data_url,'⚠️ DANGER ALERT: Elephant and Human Detected!',calDis)).start()
                         else:
                             recodedDangerEvents += 1
                       
